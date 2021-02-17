@@ -1,4 +1,4 @@
-package in.stackroute.projectone.entity;
+package in.stackroute.cplayer.entity;
 
 import java.time.LocalDateTime;
 

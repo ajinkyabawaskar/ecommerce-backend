@@ -1,8 +1,8 @@
-package in.stackroute.projectone.repository;
+package in.stackroute.cplayer.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import in.stackroute.projectone.entity.User;
+import in.stackroute.cplayer.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 }

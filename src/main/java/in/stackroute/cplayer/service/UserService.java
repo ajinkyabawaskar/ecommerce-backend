@@ -1,8 +1,8 @@
-package in.stackroute.projectone.service;
+package in.stackroute.cplayer.service;
 
 import java.util.List;
 
-import in.stackroute.projectone.entity.User;
+import in.stackroute.cplayer.entity.User;
 
 public interface UserService {
 

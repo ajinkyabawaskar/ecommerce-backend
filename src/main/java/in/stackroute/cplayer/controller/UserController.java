@@ -1,4 +1,4 @@
-package in.stackroute.projectone.controller;
+package in.stackroute.cplayer.controller;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import in.stackroute.projectone.entity.User;
-import in.stackroute.projectone.service.UserService;
+import in.stackroute.cplayer.entity.User;
+import in.stackroute.cplayer.service.UserService;
 
 @RestController
 @RequestMapping("/user")

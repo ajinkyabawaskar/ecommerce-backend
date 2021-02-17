@@ -1,4 +1,4 @@
-package in.stackroute.projectone.controller;
+package in.stackroute.cplayer.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

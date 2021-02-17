@@ -1,4 +1,4 @@
-package in.stackroute.projectone;
+package in.stackroute.cplayer;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
