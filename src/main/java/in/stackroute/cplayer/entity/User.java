@@ -1,11 +1,14 @@
 package in.stackroute.cplayer.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,41 +30,18 @@ import lombok.ToString;
 @Setter
 @Entity
 public class User {
-	/**
-	 * Unique ID of user
-	 */
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long userId;
-
-	/**
-	 * Name of the user
-	 */
+	@Column(unique = true)
+	private String username;
 	private String name;
-
-	/**
-	 * The email of user also used as username.
-	 */
 	private String email;
-
-	/**
-	 * The password of user, encrypted using bcrypt
-	 */
 	private String password;
-
-	/**
-	 * URL of the profile picture of user
-	 */
 	private String imagePath;
-
-	/**
-	 * Time when the user account is created.
-	 */
 	private LocalDateTime createdAt;
-
-	/**
-	 * OneToOne - Each user has one Favourites collection.
-	 */
-//	@OneToOne(cascade = CascadeType.ALL)
-//	private Favourites favourite;
+	@OneToMany
+	private List<Player> favourites;
+	@OneToMany
+	private List<Player> recommended;
 }
