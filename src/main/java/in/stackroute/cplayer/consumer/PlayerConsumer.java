@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import in.stackroute.cplayer.entity.Player;
-import in.stackroute.cplayer.entity.PlayerStat;
 
 @RestController
 public class PlayerConsumer {
@@ -96,19 +95,13 @@ public class PlayerConsumer {
 	@GetMapping("api/player/id/{pid}")
 	public ResponseEntity<?> getPlayerById(@PathVariable("pid") String playerId, HttpSession session) {
 
-		// check for valid user
-		if (session != null && session.getAttribute("loggedInUserId") != null) {
-			HashMap<String, String> playerStats = restTemplate.getForObject(PLAYER_STATS_URL + playerId, HashMap.class);
-
-			// check for valid playerId
-			if (!playerStats.containsKey("pid")) {
-				response = new ResponseEntity<String>("Not found", HttpStatus.NOT_FOUND);
-			} else {
-				response = new ResponseEntity<Player>(new Player(playerId, playerStats.get("name")), HttpStatus.OK);
-			}
-
+		HashMap<String, String> playerStats = restTemplate.getForObject(PLAYER_STATS_URL + playerId, HashMap.class);
+		System.out.println(playerStats);
+		// check for valid playerId
+		if (!playerStats.containsKey("pid")) {
+			response = new ResponseEntity<String>("Not found", HttpStatus.NOT_FOUND);
 		} else {
-			response = new ResponseEntity<String>("unauthorized", HttpStatus.UNAUTHORIZED);
+			response = new ResponseEntity<Player>(new Player(), HttpStatus.OK);
 		}
 
 		return response;
@@ -125,30 +118,26 @@ public class PlayerConsumer {
 
 	@SuppressWarnings("unchecked")
 	@GetMapping("api/player/name/{pname}")
-	public ResponseEntity<?> getPlayerByName(@PathVariable("pname") String playerName, HttpSession session) {
-		// check for valid user
-		if (session != null && session.getAttribute("loggedInUserId") != null) {
-			List<Object> data = (List<Object>) restTemplate.getForObject(PLAYER_BY_NAME_URL + playerName, HashMap.class)
-					.get("data");
+	public ResponseEntity<?> getPlayerByName(@PathVariable("pname") String playerName) {
+		List<Object> data = (List<Object>) restTemplate.getForObject(PLAYER_BY_NAME_URL + playerName, HashMap.class)
+				.get("data");
 
-			int totalResults = data.size();
+		int totalResults = data.size();
 
-			// check for zero matches
-			if (totalResults == 0) {
-				response = new ResponseEntity<String>("No Result Found", HttpStatus.NOT_FOUND);
-			} else {
-				List<Player> players = new ArrayList<Player>(data.size());
-
-				for (Object eachObj : data) {
-					HashMap<String, Object> eachPlayer = (HashMap<String, Object>) eachObj;
-					players.add(new Player(eachPlayer.get("pid").toString(), eachPlayer.get("name").toString()));
-				}
-				response = new ResponseEntity<List<Player>>(players, HttpStatus.OK);
-			}
-
+		// check for zero matches
+		if (totalResults == 0) {
+			response = new ResponseEntity<String>("No Result Found", HttpStatus.NOT_FOUND);
 		} else {
-			response = new ResponseEntity<String>("unauthorized", HttpStatus.UNAUTHORIZED);
+			List<Player> players = new ArrayList<Player>(data.size());
+
+			for (Object eachObj : data) {
+				HashMap<String, Object> eachPlayer = (HashMap<String, Object>) eachObj;
+				System.out.println(eachPlayer);
+//					players.add(new Player(eachPlayer.get("pid").toString(), eachPlayer.get("name").toString()));
+			}
+			response = new ResponseEntity<List<Player>>(players, HttpStatus.OK);
 		}
+
 		return response;
 	}
 
@@ -162,17 +151,11 @@ public class PlayerConsumer {
 	 */
 
 	@GetMapping("api/stats/{pid}")
-	public ResponseEntity<?> getPlayerStats(@PathVariable("pid") String playerId, HttpSession session) {
-		// check for valid user
-		if (session != null && session.getAttribute("loggedInUserId") != null) {
-			@SuppressWarnings("unchecked")
-			HashMap<String, String> playerStats = restTemplate.getForObject(PLAYER_STATS_URL + playerId, HashMap.class);
-			PlayerStat playerStat = new PlayerStat(playerId, playerStats.get("name"), playerStats.get("country"),
-					playerStats.get("playingRole"));
-			response = new ResponseEntity<PlayerStat>(playerStat, HttpStatus.OK);
-		} else {
-			response = new ResponseEntity<String>("unauthorized", HttpStatus.UNAUTHORIZED);
-		}
+	public ResponseEntity<?> getPlayerStats(@PathVariable("pid") String playerId) {
+		@SuppressWarnings("unchecked")
+		HashMap<String, String> playerStats = restTemplate.getForObject(PLAYER_STATS_URL + playerId, HashMap.class);
+		System.out.println(playerStats);
+		response = new ResponseEntity<String>("found", HttpStatus.OK);
 
 		return response;
 	}
