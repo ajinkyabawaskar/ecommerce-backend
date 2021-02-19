@@ -1,12 +1,8 @@
 package in.stackroute.cplayer.service;
 
-import java.util.List;
-
 import in.stackroute.cplayer.entity.User;
 
 public interface UserService {
-
-	public List<User> getAllUsers();
 
 	public User createUser(User user);
 
@@ -17,4 +13,5 @@ public interface UserService {
 	public Boolean deleteUser(Long userId);
 
 	public User getUserByUsername(String username);
+	
 }
