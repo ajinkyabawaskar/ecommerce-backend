@@ -35,8 +35,6 @@ public class Player {
 	public String v;
 	@OneToOne
 	public Data data;
-	public int ttl;
 	@OneToOne
 	public Provider provider;
-	public int creditsLeft;
 }
