@@ -6,12 +6,12 @@ public interface UserService {
 
 	public User createUser(User user);
 
-	public User readUser(Long userId);
+	public User readUser(String username);
 
 	public User updateUser(User user);
 
-	public Boolean deleteUser(Long userId);
+	public Boolean deleteUser(String username);
 
 	public User getUserByUsername(String username);
-	
+
 }
