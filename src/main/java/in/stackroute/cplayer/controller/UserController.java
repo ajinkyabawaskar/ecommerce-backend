@@ -31,7 +31,7 @@ public class UserController {
 		return userService.getUserByUsername(getUsername(authorizationHeader));
 	}
 
-	@PostMapping("/")
+	@PostMapping("/register")
 	public User createUser(@RequestBody User user) {
 		return userService.createUser(user);
 	}
