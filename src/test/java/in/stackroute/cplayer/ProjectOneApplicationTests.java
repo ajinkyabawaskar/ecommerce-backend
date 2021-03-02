@@ -1,4 +1,4 @@
-package in.stackroute.projectone;
+package in.stackroute.cplayer;
 
 import org.springframework.boot.test.context.SpringBootTest;
 
