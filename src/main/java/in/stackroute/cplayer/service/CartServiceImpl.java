@@ -30,10 +30,15 @@ public class CartServiceImpl implements CartService {
 	public Product removeFromCart(String username, Product product) {
 		User user = userRepository.findByUsername(username);
 		List<Product> cart = new ArrayList<Product>(user.getCart());
-		if (cart.contains(product)) {
-			cart.remove(product);
-			user.setCart(cart);
-			userRepository.save(user);
+		for (Product cartProduct : cart) {
+			long given = cartProduct.getPid();
+			long wanted = product.getPid();
+			if (wanted == given) {
+				cart.remove(cartProduct);
+				user.setCart(cart);
+				userRepository.save(user);
+				break;
+			}
 		}
 		return product;
 	}
