@@ -53,8 +53,7 @@ public class CartController {
 	}
 
 	@DeleteMapping("/")
-	public ResponseEntity<?> emptyCart(@RequestBody Product product,
-			@RequestHeader("Authorization") String authorizationHeader) {
+	public ResponseEntity<?> emptyCart(@RequestHeader("Authorization") String authorizationHeader) {
 		ResponseEntity<String> response;
 		try {
 			String username = getUsername(authorizationHeader);
