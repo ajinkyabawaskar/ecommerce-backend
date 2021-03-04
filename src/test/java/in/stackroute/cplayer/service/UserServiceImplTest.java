@@ -1,42 +1,25 @@
 package in.stackroute.cplayer.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import in.stackroute.cplayer.ProjectOneApplication;
 import in.stackroute.cplayer.entity.User;
 import in.stackroute.cplayer.repository.UserRepository;
-import in.stackroute.cplayer.security.JwtUtil;
-import in.stackroute.cplayer.service.UserServiceImpl;
-
-
-import org.junit.jupiter.api.Test;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
 //@WebMvcTest
-@ContextConfiguration(classes = {ProjectOneApplication.class})
+@ContextConfiguration(classes = { ProjectOneApplication.class })
 class UserServiceImplTest {
 
 	@InjectMocks
@@ -44,8 +27,8 @@ class UserServiceImplTest {
 	private UserServiceImpl userServiceImpl;
 
 	@MockBean
-	private UserRepository userRepository;	
-	
+	private UserRepository userRepository;
+
 //	@Autowired
 //	private JwtUtil jwtUtil;	
 //	@Autowired
@@ -77,19 +60,19 @@ class UserServiceImplTest {
 		Mockito.when(userRepository.findByUsername(user.getUsername())).thenReturn(user);
 		Mockito.when(userRepository.save(user)).thenReturn(user);
 		User userEntity = userServiceImpl.createUser(user);
-		assertEquals(user,userEntity);
-		Mockito.verify(userRepository,Mockito.times(1)).save(user);
+		assertEquals(user, userEntity);
+		Mockito.verify(userRepository, Mockito.times(1)).save(user);
 	}
-	
+
 	@Test
 	public void testCreateUserFailure() {
 		Mockito.when(userRepository.findByUsername(user.getUsername())).thenReturn(user);
 		Mockito.when(userRepository.save(user)).thenReturn(null);
 		User userEntity = userServiceImpl.createUser(user);
-		assertEquals(null,userEntity);
-		Mockito.verify(userRepository,Mockito.times(1)).save(user);
+		assertEquals(null, userEntity);
+		Mockito.verify(userRepository, Mockito.times(1)).save(user);
 	}
-	
+
 	@Test
 	public void testUpdateUserSuccess() {
 		Mockito.when(userRepository.getOne(user.getUserId())).thenReturn(user);
@@ -97,52 +80,53 @@ class UserServiceImplTest {
 		Mockito.when(userRepository.save(user)).thenReturn(user);
 		Mockito.when(userServiceImpl.updateUser(user)).thenReturn(user);
 		User userEntity = userServiceImpl.updateUser(user);
-		assertEquals("user@gmail.com",user.getEmail());
-		Mockito.verify(userRepository,Mockito.times(1)).save(user);
-		
+		assertEquals("user@gmail.com", user.getEmail());
+		Mockito.verify(userRepository, Mockito.times(1)).save(user);
+
 	}
-	
+
 	@Test
 	public void testUpdateUserFailure() {
 		Mockito.when(userRepository.getOne(user.getUserId())).thenReturn(user);
 		Mockito.when(userRepository.save(user)).thenReturn(user);
-		User userEntity = userServiceImpl.updateUser(user);		
+		User userEntity = userServiceImpl.updateUser(user);
 	}
 
 	@Test
 	public void testReadUserSuccess() {
 		Mockito.when(userRepository.save(user)).thenReturn(user);
 		Mockito.when(userServiceImpl.createUser(user)).thenReturn(user);
-		User userEntity = userServiceImpl.readUser(user.getUsername());
-		assertEquals(user,userEntity);
+		Mockito.when(userRepository.findByUsername(user.getUsername())).thenReturn(user);
+		User userEntity = userServiceImpl.getUserByUsername(user.getUsername());
+		assertEquals(user, userEntity);
 	}
-	
+
 	@Test
 	public void testReadUserFailure() {
 		Mockito.when(userRepository.save(user)).thenReturn(null);
 		Mockito.when(userServiceImpl.createUser(user)).thenReturn(null);
 		User userEntity = userServiceImpl.readUser(user.getUsername());
-		assertEquals(null,userEntity);
+		assertEquals(null, userEntity);
 	}
-	
+
 	@Test
 	public void testDeleteUserSuccess() {
 		Mockito.when(userRepository.findByUsername(user.getUsername())).thenReturn(user);
 		Mockito.when(userRepository.save(user)).thenReturn(user);
 		User userEntity = userServiceImpl.createUser(user);
-		assertEquals(user,userEntity);
-		Mockito.verify(userRepository,Mockito.times(1)).save(user);
+		assertEquals(user, userEntity);
+		Mockito.verify(userRepository, Mockito.times(1)).save(user);
 		boolean status = userServiceImpl.deleteUser(user.getUsername());
 		assertTrue(status);
 	}
-	
+
 	@Test
-	public void testDeleteUserFailure() {		
+	public void testDeleteUserFailure() {
 		Mockito.when(userRepository.findByUsername(user.getUsername())).thenReturn(user);
 		Mockito.when(userRepository.save(user)).thenReturn(null);
 		User userEntity = userServiceImpl.createUser(user);
 		boolean status = userServiceImpl.deleteUser(user.getUsername());
-		assertTrue(status);		
+		assertTrue(status);
 	}
 
 //	@Test
