@@ -6,23 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import in.stackroute.cplayer.ProjectOneApplication;
 import in.stackroute.cplayer.entity.User;
 import in.stackroute.cplayer.repository.UserRepository;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
-//@WebMvcTest
-@ContextConfiguration(classes = { ProjectOneApplication.class })
 class UserServiceImplTest {
 
 	@InjectMocks
