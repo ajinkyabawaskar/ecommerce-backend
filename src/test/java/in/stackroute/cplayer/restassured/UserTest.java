@@ -153,9 +153,8 @@ public class UserTest {
 		Response response = given().contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
 				.queryParam("username", randomString).queryParam("password", randomString)
 				.queryParam("name", randomString).queryParam("email", randomString + "@example.com")
-				.multiPart("type", "image/gif")
-				.multiPart("file", new File("/home/sam.g/Desktop/Flipzon_upload")).when().post(endpoint)
-				.then().extract().response();
+				.multiPart("type", "image/png").multiPart("file", new File("profile.png")).when().post(endpoint).then()
+				.extract().response();
 
 		JsonPath jsonPathEvaluator = response.jsonPath();
 		String name = jsonPathEvaluator.get("name");
