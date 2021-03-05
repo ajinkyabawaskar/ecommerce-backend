@@ -154,7 +154,7 @@ public class UserTest {
 				.queryParam("username", randomString).queryParam("password", randomString)
 				.queryParam("name", randomString).queryParam("email", randomString + "@example.com")
 				.multiPart("type", "image/gif")
-				.multiPart("file", new File("/home/ajinkya.bawaskar/Documents/profile.gif")).when().post(endpoint)
+				.multiPart("file", new File("/home/sam.g/Desktop/Flipzon_upload")).when().post(endpoint)
 				.then().extract().response();
 
 		JsonPath jsonPathEvaluator = response.jsonPath();
