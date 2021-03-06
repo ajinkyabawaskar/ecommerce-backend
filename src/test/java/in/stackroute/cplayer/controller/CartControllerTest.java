@@ -1,12 +1,12 @@
 package in.stackroute.cplayer.controller;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -30,19 +30,24 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
+import in.stackroute.cplayer.entity.Product;
 import in.stackroute.cplayer.entity.User;
 import in.stackroute.cplayer.security.MyUserDetailsService;
+import in.stackroute.cplayer.service.CartService;
 import in.stackroute.cplayer.service.UserService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserControllerTest {
+public class CartControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockBean
 	private UserService userService;
+
+	@MockBean
+	private CartService cartService;
 
 	@MockBean
 	private MyUserDetailsService udService;
@@ -53,6 +58,8 @@ public class UserControllerTest {
 	private static long randomId;
 	private static String randomString;
 	private static User user;
+	private static Product product;
+	private static List<Product> cart;
 
 	private ObjectMapper mapper = new ObjectMapper();
 
@@ -68,6 +75,16 @@ public class UserControllerTest {
 		user.setUsername(randomString);
 		user.setPassword(randomString);
 		user.setName(randomString);
+
+		product = new Product();
+		product.setPid(randomId + 1);
+		product.setName("product_" + randomString);
+		product.setCategory("category_" + randomString);
+
+		cart = new ArrayList<Product>();
+		cart.add(product);
+		user.setCart(cart);
+
 	}
 
 	@BeforeEach
@@ -80,10 +97,12 @@ public class UserControllerTest {
 				.queryParam("username", randomString).queryParam("password", randomString)
 				.queryParam("name", randomString).queryParam("email", randomString).characterEncoding("UTF-8"))
 				.andExpect(status().isOk());
+
+		Mockito.when(cartService.addToCart(randomString, product)).thenReturn(product);
 	}
 
 	@Test
-	public void testGetOwnData() throws Exception {
+	public void testGetCart() throws Exception {
 
 		String userJson = mapper.writeValueAsString(user);
 
@@ -100,14 +119,15 @@ public class UserControllerTest {
 		String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.jwt");
 
 		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
+		Mockito.when(cartService.getCart(randomString)).thenReturn(cart);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/user/").header("Authorization", "Bearer " + jwt))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.username", Matchers.equalTo(randomString)));
-
+		mockMvc.perform(MockMvcRequestBuilders.get("/cart/").header("Authorization", "Bearer " + jwt))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.[0].name", Matchers.equalTo("product_" + randomString)));
 	}
 
 	@Test
-	public void testUpdateUser() throws Exception {
+	public void testAddToCart() throws Exception {
 
 		String userJson = mapper.writeValueAsString(user);
 
@@ -123,20 +143,26 @@ public class UserControllerTest {
 
 		String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.jwt");
 
-		user.setName("Updated Name");
-		userJson = mapper.writeValueAsString(user);
-		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
-		Mockito.when(userService.updateUser(user)).thenReturn(user);
-		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
-		result = mockMvc
-				.perform(MockMvcRequestBuilders.put("/user/").header("Authorization", "Bearer " + jwt)
-						.contentType(MediaType.APPLICATION_JSON).content(userJson))
-				.andExpect(status().isOk()).andDo(print()).andReturn();
+		Product p = new Product();
+		p.setName("Test add");
 
+		Mockito.when(cartService.addToCart(randomString, p)).thenReturn(p);
+
+		cart.add(p);
+		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
+		Mockito.when(cartService.getCart(randomString)).thenReturn(cart);
+
+		String productJson = mapper.writeValueAsString(p);
+
+		mockMvc.perform(MockMvcRequestBuilders.post("/cart/").header("Authorization", "Bearer " + jwt)
+				.contentType(MediaType.APPLICATION_JSON).content(productJson)).andExpect(status().isOk()).andDo(res -> {
+					System.out.println(res.getResponse().getContentAsString());
+				});
 	}
 
 	@Test
-	public void testDeleteUser() throws Exception {
+	public void testRemoveFromCart() throws Exception {
+
 		String userJson = mapper.writeValueAsString(user);
 
 		org.springframework.security.core.userdetails.User userT = new org.springframework.security.core.userdetails.User(
@@ -151,12 +177,42 @@ public class UserControllerTest {
 
 		String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.jwt");
 
-		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
-		Mockito.when(userService.deleteUser(randomString)).thenReturn(true);
+		String productJson = mapper.writeValueAsString(product);
+		Mockito.when(cartService.removeFromCart(randomString, product)).thenReturn(product);
 
-		mockMvc.perform(MockMvcRequestBuilders.delete("/user/").header("Authorization", "Bearer " + jwt))
-				.andExpect(status().isOk()).andDo(mvcResult -> {
-					Assertions.assertEquals("true", mvcResult.getResponse().getContentAsString());
+		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
+		Mockito.when(cartService.getCart(randomString)).thenReturn(cart);
+		mockMvc.perform(MockMvcRequestBuilders.put("/cart/").header("Authorization", "Bearer " + jwt)
+				.contentType(MediaType.APPLICATION_JSON).content(productJson)).andExpect(status().isOk()).andDo(res -> {
+					System.out.println(res.getResponse().getContentAsString());
+				});
+	}
+
+	@Test
+	public void testEmptyCart() throws Exception {
+
+		String userJson = mapper.writeValueAsString(user);
+
+		org.springframework.security.core.userdetails.User userT = new org.springframework.security.core.userdetails.User(
+				randomString, passwordEncoder.encode(randomString), new ArrayList<>());
+
+		Mockito.when(udService.loadUserByUsername(randomString)).thenReturn(userT);
+
+		MvcResult result = mockMvc
+				.perform(MockMvcRequestBuilders.post("/authenticate").contentType(MediaType.APPLICATION_JSON)
+						.content(userJson))
+				.andExpect(jsonPath("$.jwt", Matchers.notNullValue())).andExpect(status().isOk()).andReturn();
+
+		String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.jwt");
+
+		String productJson = mapper.writeValueAsString(product);
+		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
+		Mockito.when(cartService.getCart(randomString)).thenReturn(cart);
+
+		mockMvc.perform(MockMvcRequestBuilders.delete("/cart/").header("Authorization", "Bearer " + jwt)
+				.contentType(MediaType.APPLICATION_JSON).content(productJson)).andExpect(status().isOk()).andDo(res -> {
+					String response = (res.getResponse().getContentAsString());
+					Assertions.assertTrue(response.contains("Cart emptied successfully."));
 				});
 	}
 }

@@ -1,7 +1,6 @@
 package in.stackroute.cplayer.controller;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -15,6 +14,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,7 +37,7 @@ import in.stackroute.cplayer.service.UserService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UserControllerTest {
+public class ProductControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -83,7 +84,7 @@ public class UserControllerTest {
 	}
 
 	@Test
-	public void testGetOwnData() throws Exception {
+	public void testGetAllProducts() throws Exception {
 
 		String userJson = mapper.writeValueAsString(user);
 
@@ -101,62 +102,129 @@ public class UserControllerTest {
 
 		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
 
-		mockMvc.perform(MockMvcRequestBuilders.get("/user/").header("Authorization", "Bearer " + jwt))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.username", Matchers.equalTo(randomString)));
-
-	}
-
-	@Test
-	public void testUpdateUser() throws Exception {
-
-		String userJson = mapper.writeValueAsString(user);
-
-		org.springframework.security.core.userdetails.User userT = new org.springframework.security.core.userdetails.User(
-				randomString, passwordEncoder.encode(randomString), new ArrayList<>());
-
-		Mockito.when(udService.loadUserByUsername(randomString)).thenReturn(userT);
-
-		MvcResult result = mockMvc
-				.perform(MockMvcRequestBuilders.post("/authenticate").contentType(MediaType.APPLICATION_JSON)
-						.content(userJson))
-				.andExpect(jsonPath("$.jwt", Matchers.notNullValue())).andExpect(status().isOk()).andReturn();
-
-		String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.jwt");
-
-		user.setName("Updated Name");
-		userJson = mapper.writeValueAsString(user);
-		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
-		Mockito.when(userService.updateUser(user)).thenReturn(user);
-		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
-		result = mockMvc
-				.perform(MockMvcRequestBuilders.put("/user/").header("Authorization", "Bearer " + jwt)
-						.contentType(MediaType.APPLICATION_JSON).content(userJson))
-				.andExpect(status().isOk()).andDo(print()).andReturn();
-
-	}
-
-	@Test
-	public void testDeleteUser() throws Exception {
-		String userJson = mapper.writeValueAsString(user);
-
-		org.springframework.security.core.userdetails.User userT = new org.springframework.security.core.userdetails.User(
-				randomString, passwordEncoder.encode(randomString), new ArrayList<>());
-
-		Mockito.when(udService.loadUserByUsername(randomString)).thenReturn(userT);
-
-		MvcResult result = mockMvc
-				.perform(MockMvcRequestBuilders.post("/authenticate").contentType(MediaType.APPLICATION_JSON)
-						.content(userJson))
-				.andExpect(jsonPath("$.jwt", Matchers.notNullValue())).andExpect(status().isOk()).andReturn();
-
-		String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.jwt");
-
-		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
-		Mockito.when(userService.deleteUser(randomString)).thenReturn(true);
-
-		mockMvc.perform(MockMvcRequestBuilders.delete("/user/").header("Authorization", "Bearer " + jwt))
+		mockMvc.perform(MockMvcRequestBuilders.get("/product/all/").header("Authorization", "Bearer " + jwt))
 				.andExpect(status().isOk()).andDo(mvcResult -> {
-					Assertions.assertEquals("true", mvcResult.getResponse().getContentAsString());
+					String jsonString = (mvcResult.getResponse().getContentAsString());
+					int length = JsonPath.parse(jsonString).read("$.length()");
+					Assertions.assertTrue(length > 10);
+					Assertions.assertTrue(jsonString.contains("Mac"));
 				});
 	}
+
+	@Test
+	public void testGetAllCategories() throws Exception {
+
+		String userJson = mapper.writeValueAsString(user);
+
+		org.springframework.security.core.userdetails.User userT = new org.springframework.security.core.userdetails.User(
+				randomString, passwordEncoder.encode(randomString), new ArrayList<>());
+
+		Mockito.when(udService.loadUserByUsername(randomString)).thenReturn(userT);
+
+		MvcResult result = mockMvc
+				.perform(MockMvcRequestBuilders.post("/authenticate").contentType(MediaType.APPLICATION_JSON)
+						.content(userJson))
+				.andExpect(jsonPath("$.jwt", Matchers.notNullValue())).andExpect(status().isOk()).andReturn();
+
+		String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.jwt");
+
+		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
+
+		mockMvc.perform(MockMvcRequestBuilders.get("/product/category/").header("Authorization", "Bearer " + jwt))
+				.andExpect(status().isOk()).andDo(mvcResult -> {
+					String jsonString = (mvcResult.getResponse().getContentAsString());
+					int length = JsonPath.parse(jsonString).read("$.length()");
+					Assertions.assertTrue(length > 1);
+					Assertions.assertTrue(jsonString.contains("laptop"));
+				});
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "2231", "7186" })
+	public void testGetById(String id) throws Exception {
+
+		String userJson = mapper.writeValueAsString(user);
+
+		org.springframework.security.core.userdetails.User userT = new org.springframework.security.core.userdetails.User(
+				randomString, passwordEncoder.encode(randomString), new ArrayList<>());
+
+		Mockito.when(udService.loadUserByUsername(randomString)).thenReturn(userT);
+
+		MvcResult result = mockMvc
+				.perform(MockMvcRequestBuilders.post("/authenticate").contentType(MediaType.APPLICATION_JSON)
+						.content(userJson))
+				.andExpect(jsonPath("$.jwt", Matchers.notNullValue())).andExpect(status().isOk()).andReturn();
+
+		String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.jwt");
+
+		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
+
+		mockMvc.perform(MockMvcRequestBuilders.get("/product/id/" + id).header("Authorization", "Bearer " + jwt))
+				.andExpect(status().isOk()).andDo(mvcResult -> {
+					String jsonString = (mvcResult.getResponse().getContentAsString());
+					Assertions.assertTrue(jsonString.contains("pid"));
+				});
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "lenovo", "asus", "apple", "hp" })
+	public void testGetByName(String name) throws Exception {
+
+		String userJson = mapper.writeValueAsString(user);
+
+		org.springframework.security.core.userdetails.User userT = new org.springframework.security.core.userdetails.User(
+				randomString, passwordEncoder.encode(randomString), new ArrayList<>());
+
+		Mockito.when(udService.loadUserByUsername(randomString)).thenReturn(userT);
+
+		MvcResult result = mockMvc
+				.perform(MockMvcRequestBuilders.post("/authenticate").contentType(MediaType.APPLICATION_JSON)
+						.content(userJson))
+				.andExpect(jsonPath("$.jwt", Matchers.notNullValue())).andExpect(status().isOk()).andReturn();
+
+		String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.jwt");
+
+		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
+
+		mockMvc.perform(MockMvcRequestBuilders.get("/product/name/" + name).header("Authorization", "Bearer " + jwt))
+				.andExpect(status().isOk()).andDo(mvcResult -> {
+					String jsonString = (mvcResult.getResponse().getContentAsString());
+					int length = JsonPath.parse(jsonString).read("$.length()");
+					Assertions.assertTrue(length > 1);
+				});
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "laptops", "Data Cards", "Routers" })
+	public void testGetByCategory(String category) throws Exception {
+
+		String userJson = mapper.writeValueAsString(user);
+
+		org.springframework.security.core.userdetails.User userT = new org.springframework.security.core.userdetails.User(
+				randomString, passwordEncoder.encode(randomString), new ArrayList<>());
+
+		Mockito.when(udService.loadUserByUsername(randomString)).thenReturn(userT);
+
+		MvcResult result = mockMvc
+				.perform(MockMvcRequestBuilders.post("/authenticate").contentType(MediaType.APPLICATION_JSON)
+						.content(userJson))
+				.andExpect(jsonPath("$.jwt", Matchers.notNullValue())).andExpect(status().isOk()).andReturn();
+
+		String jwt = JsonPath.read(result.getResponse().getContentAsString(), "$.jwt");
+
+		Mockito.when(userService.getUserByUsername(randomString)).thenReturn(user);
+
+		mockMvc.perform(
+				MockMvcRequestBuilders.get("/product/category/" + category).header("Authorization", "Bearer " + jwt))
+				.andExpect(status().isOk()).andDo(mvcResult -> {
+					String jsonString = (mvcResult.getResponse().getContentAsString());
+					int length = JsonPath.parse(jsonString).read("$.length()");
+					Assertions.assertTrue(length > 1);
+				});
+
+	}
+
 }

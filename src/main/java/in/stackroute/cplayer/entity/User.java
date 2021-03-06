@@ -29,7 +29,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @Entity
-public class User {
+public class User implements Comparable<User> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long userId;
@@ -42,4 +42,9 @@ public class User {
 	private LocalDateTime createdAt;
 	@OneToMany(cascade = CascadeType.ALL)
 	private List<Product> cart;
+
+	@Override
+	public int compareTo(User otherUser) {
+		return username.compareTo(otherUser.getUsername());
+	}
 }
