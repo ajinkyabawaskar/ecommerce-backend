@@ -64,7 +64,6 @@ public class UserController {
 		user.setImagePath(fileDownloadUri);
 
 		User createdUser = userService.createUser(user);
-		System.out.println(createdUser);
 		return createdUser;
 	}
 
@@ -83,7 +82,7 @@ public class UserController {
 
 	@GetMapping("/images/{fileName:.+}")
 	public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
-		System.out.println(fileName);
+
 		// Load file as Resource
 		Resource resource = fileStorageService.loadFileAsResource(fileName);
 
