@@ -41,9 +41,9 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.cors().and().csrf().disable().authorizeRequests().antMatchers("/swagger-ui/**").permitAll()
 				.antMatchers("/v2/**").permitAll().antMatchers("/swagger-resources/**").permitAll()
-				.antMatchers("/user/register").permitAll().antMatchers("/authenticate").permitAll().anyRequest()
-				.authenticated().and().exceptionHandling().and().sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+				.antMatchers("/user/register").permitAll().antMatchers("/authenticate").permitAll()
+				.antMatchers("/user/images/**").permitAll().anyRequest().authenticated().and().exceptionHandling().and()
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 	}
